@@ -42,12 +42,12 @@ namespace MongoIce.Test
 		public IList<Comment> Comments { get; set; }
 	}
 
-	public class MongoContext : BaseMongoContext
+	public class MongoContext : BaseDocumentContext
 	{
 		/// <summary>
 		/// Reports collection
 		/// </summary>
-		[CollectionDescriptor("Comments", typeof(Comment))]
+		[CollectionDescriptor(typeof(Comment))]
 		[IndexDescriptor("Timestamp", IndexType.Ascending, true, false, false)]
 		public IMongoCollection<Comment> Comments { get; set; }
 
@@ -74,6 +74,37 @@ namespace MongoIce.Test
 		public void Initialize()
 		{
 
+		}
+
+		[TestMethod]
+		public void TestGetCollectionByGenericType()
+		{
+			using (var context = new MongoContext(DatabaseUrl, DatabaseName))
+			{
+				var commentCollection = context.GetCollectionByGeneric<Comment>();
+
+				Assert.AreNotEqual(commentCollection, null);
+
+				commentCollection.DeleteMany(x => x.Id != null);
+
+				var count = commentCollection.CountDocuments(new BsonDocument());
+
+				Assert.AreEqual(count, 0);
+
+				var comment = new Comment
+				{
+					//Id = ObjectId.GenerateNewId(),
+					Content = "The content of the comment 1",
+					Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+					AuthorName = "John Doe"
+				};
+
+				commentCollection.InsertOneAsync(comment, null).Wait();
+
+				count = commentCollection.CountDocuments(new BsonDocument());
+
+				Assert.AreEqual(count, 1);
+			}
 		}
 
 		[TestMethod]

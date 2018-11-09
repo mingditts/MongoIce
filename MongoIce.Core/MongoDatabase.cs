@@ -17,9 +17,9 @@ namespace MongoIce.Core
 		private ClientConfiguration _clientConfiguration;
 		private IMongoDatabase _database;
 
-		private BaseMongoContext _context;
+		private BaseDocumentContext _context;
 
-		public MongoDatabase(string serverUrl, string databaseName, BaseMongoContext context, ClientConfiguration clientConfiguration)
+		public MongoDatabase(string serverUrl, string databaseName, BaseDocumentContext context, ClientConfiguration clientConfiguration)
 		{
 			this._serverUrl = serverUrl;
 			this._databaseName = databaseName;
@@ -42,14 +42,14 @@ namespace MongoIce.Core
 		/// <summary>
 		/// Migrate collection
 		/// </summary>
+		/// <param name="name"></param>
 		/// <param name="collectionPropertyType"></param>
 		/// <param name="descriptor"></param>
-		/// <returns></returns>
-		private void MigrateCollection(Type collectionPropertyType, CollectionDescriptor descriptor)
+		private void MigrateCollection(string name, Type collectionPropertyType, CollectionDescriptor descriptor)
 		{
-			if (!this.CollectionExists(descriptor.Name))
+			if (!this.CollectionExists(name))
 			{
-				this._database.CreateCollection(descriptor.Name, new CreateCollectionOptions
+				this._database.CreateCollection(name, new CreateCollectionOptions
 				{
 					MaxDocuments = descriptor.MaxDocuments > 0 ? descriptor.MaxDocuments : (long?)null,
 					Capped = descriptor.Capped,
@@ -62,9 +62,9 @@ namespace MongoIce.Core
 			var typedCollection = typeof(MongoDatabase)
 				.GetMethod("GetCollectionByName", BindingFlags.NonPublic | BindingFlags.Instance)
 				.MakeGenericMethod(new Type[] { collectionPropertyType })
-				.Invoke(this, new object[] { descriptor.Name });
+				.Invoke(this, new object[] { name });
 
-			this._context.GetType().GetProperty(descriptor.Name).SetValue(this._context, typedCollection);
+			this._context.GetType().GetProperty(name).SetValue(this._context, typedCollection);
 		}
 
 		/// <summary>
@@ -80,9 +80,9 @@ namespace MongoIce.Core
 			{
 				CollectionDescriptor descriptor = collectionProperty.GetCustomAttributes(typeof(CollectionDescriptor), false).FirstOrDefault() as CollectionDescriptor;
 
-				Type entityType = Type.GetType(collectionProperty.PropertyType.GenericTypeArguments[0].FullName + "," + descriptor.Type.Assembly.FullName);
+				Type entityType = Type.GetType(collectionProperty.PropertyType.GenericTypeArguments[0].FullName + "," + collectionProperty.Module.Assembly.FullName);
 
-				this.MigrateCollection(entityType, descriptor);
+				this.MigrateCollection(collectionProperty.Name, entityType, descriptor);
 			}
 
 			this._context.CreateIndexes();
