@@ -5,7 +5,7 @@
     <Version>0.0.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>A entity framework-like library for MongoDB</Description>
+    <Description>An entity framework-like library for MongoDB</Description>
     <PackageReleaseNotes>Unstable. Work in progress!</PackageReleaseNotes>
     <AssemblyVersion>0.0.0.1</AssemblyVersion>
     <FileVersion>0.0.0.1</FileVersion>

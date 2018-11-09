@@ -6,11 +6,6 @@ namespace MongoIce.Core.Attributes
 	public class CollectionDescriptor : Attribute
 	{
 		/// <summary>
-		/// Get the name of the collection
-		/// </summary>
-		public string Name { get; }
-
-		/// <summary>
 		/// Type of the collection
 		/// </summary>
 		public Type Type { get; }
@@ -41,7 +36,6 @@ namespace MongoIce.Core.Attributes
 		public bool Capped { get; }
 
 		public CollectionDescriptor(
-			string name,
 			Type type,
 			bool capped = false,
 			long maxDocuments = 0,
@@ -49,7 +43,6 @@ namespace MongoIce.Core.Attributes
 			DocumentValidationAction validationAction = DocumentValidationAction.Error,
 			DocumentValidationLevel validationLevel = DocumentValidationLevel.Off)
 		{
-			this.Name = name;
 			this.Type = type;
 			this.Capped = capped;
 			this.MaxDocuments = maxDocuments;
