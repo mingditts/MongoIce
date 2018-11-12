@@ -25,7 +25,7 @@ public class Comment
   public string Content { get; set; }
 }
 
-public class MongoContext : BaseMongoContext
+public class MongoContext : BaseDocumentContext
 {
   /// <summary>
   /// Comment collection
