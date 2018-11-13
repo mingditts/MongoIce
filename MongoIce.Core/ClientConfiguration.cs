@@ -13,15 +13,5 @@ namespace MongoIce.Core
 		/// Connection timeout
 		/// </summary>
 		public TimeSpan ConnectTimeout { get; set; }
-
-		/// <summary>
-		/// Heartbeat interval
-		/// </summary>
-		public TimeSpan HeartbeatInterval { get; set; }
-
-		/// <summary>
-		/// Heartbeat timeout
-		/// </summary>
-		public TimeSpan HeartbeatTimeout { get; set; }
 	}
 }

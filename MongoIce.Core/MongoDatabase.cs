@@ -24,6 +24,16 @@ namespace MongoIce.Core
 			this._serverUrl = serverUrl;
 			this._databaseName = databaseName;
 			this._clientConfiguration = clientConfiguration;
+
+			if (this._clientConfiguration == null)
+			{
+				this._clientConfiguration = new ClientConfiguration
+				{
+					UseSsl = true,
+					ConnectTimeout = TimeSpan.FromMilliseconds(30000)
+				};
+			}
+
 			this._context = context;
 		}
 
@@ -105,17 +115,8 @@ namespace MongoIce.Core
 		{
 			MongoClientSettings clientSettings = MongoClientSettings.FromUrl(MongoUrl.Create(this._serverUrl));
 
-			if (this._clientConfiguration != null)
-			{
-				clientSettings.UseSsl = this._clientConfiguration.UseSsl;
-				clientSettings.ConnectTimeout = this._clientConfiguration.ConnectTimeout;
-				clientSettings.HeartbeatInterval = this._clientConfiguration.HeartbeatInterval;
-				clientSettings.HeartbeatTimeout = this._clientConfiguration.HeartbeatTimeout;
-			}
-			else
-			{
-				clientSettings.UseSsl = false;
-			}
+			clientSettings.UseSsl = this._clientConfiguration.UseSsl;
+			clientSettings.ConnectTimeout = this._clientConfiguration.ConnectTimeout;
 
 			this._client = new MongoClient(clientSettings);
 
