@@ -18,6 +18,7 @@ public class Comment
   [BsonRepresentation(BsonType.ObjectId)]
   public string Id { get; set; }
 
+  [IndexDescriptor("Timestamp", IndexType.Ascending, true, false, false)]
   public long Timestamp { get; set; }
 
   public string AuthorName { get; set; }
@@ -31,7 +32,6 @@ public class MongoContext : BaseDocumentContext
   /// Comment collection
   /// </summary>
   [CollectionDescriptor("Comments", typeof(Comment))]
-  [IndexDescriptor("Timestamp", IndexType.Ascending, true, false, false)]
   public IMongoCollection<Comment> Comments { get; set; }
 
   public MongoContext(string serverUrl, string databaseName) : base(serverUrl, databaseName)
