@@ -24,6 +24,7 @@ namespace MongoIce.Test
 		/// <summary>
 		/// Timestamp of the entity
 		/// </summary>
+		[IndexDescriptor(IndexType.Ascending, true, false, false)]
 		public long Timestamp { get; set; }
 
 		/// <summary>
@@ -48,7 +49,6 @@ namespace MongoIce.Test
 		/// Reports collection
 		/// </summary>
 		[CollectionDescriptor(typeof(Comment))]
-		[IndexDescriptor("Timestamp", IndexType.Ascending, true, false, false)]
 		public IMongoCollection<Comment> Comments { get; set; }
 
 		public MongoContext(string serverUrl, string databaseName) : base(serverUrl, databaseName)

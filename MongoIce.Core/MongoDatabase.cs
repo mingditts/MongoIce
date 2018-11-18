@@ -29,7 +29,7 @@ namespace MongoIce.Core
 			{
 				this._clientConfiguration = new ClientConfiguration
 				{
-					UseSsl = true,
+					UseSsl = false,
 					ConnectTimeout = TimeSpan.FromMilliseconds(30000)
 				};
 			}
@@ -151,71 +151,60 @@ namespace MongoIce.Core
 
 		public void CreateIndex<T>(IMongoCollection<T> collection)
 		{
-			var properties = this._context.GetType().GetProperties();
+			var typeProperties = typeof(T).GetProperties();
 
-			IList<PropertyInfo> collectionProperties = properties.Where(x => Attribute.IsDefined(x, typeof(CollectionDescriptor))).ToList();
-
-			if (collectionProperties == null)
+			foreach (var property in typeProperties)
 			{
-				return;
-			}
+				IndexDescriptor indexDescriptor = property.GetCustomAttributes(typeof(IndexDescriptor), false).FirstOrDefault() as IndexDescriptor;
 
-			PropertyInfo collectionProperty = collectionProperties.Where(x => x.Name.Equals(collection.CollectionNamespace.CollectionName)).FirstOrDefault();
+				if (indexDescriptor == null)
+				{
+					continue;
+				}
 
-			if (collectionProperty == null)
-			{
-				return;
-			}
+				IndexKeysDefinition<T> index = null;
 
-			IndexDescriptor indexDescriptor = collectionProperty.GetCustomAttributes(typeof(IndexDescriptor), false).FirstOrDefault() as IndexDescriptor;
+				FieldDefinition<T> indexedColumn = property.Name;
 
-			if (indexDescriptor == null || string.IsNullOrEmpty(indexDescriptor.Key))
-			{
-				return;
-			}
+				switch (indexDescriptor.Type)
+				{
+					case IndexType.Ascending:
+						index = new IndexKeysDefinitionBuilder<T>().Ascending(indexedColumn);
+						break;
 
-			IndexKeysDefinition<T> index = null;
+					case IndexType.Descending:
+						index = new IndexKeysDefinitionBuilder<T>().Descending(indexedColumn);
+						break;
 
-			FieldDefinition<T> indexedColumn = indexDescriptor.Key;
+					case IndexType.Geo2D:
+						index = new IndexKeysDefinitionBuilder<T>().Geo2D(indexedColumn);
+						break;
 
-			switch (indexDescriptor.Type)
-			{
-				case IndexType.Ascending:
-					index = new IndexKeysDefinitionBuilder<T>().Ascending(indexedColumn);
-					break;
+					case IndexType.Geo2DSphere:
+						index = new IndexKeysDefinitionBuilder<T>().Geo2DSphere(indexedColumn);
+						break;
 
-				case IndexType.Descending:
-					index = new IndexKeysDefinitionBuilder<T>().Descending(indexedColumn);
-					break;
+					case IndexType.Hashed:
+						index = new IndexKeysDefinitionBuilder<T>().Hashed(indexedColumn);
+						break;
 
-				case IndexType.Geo2D:
-					index = new IndexKeysDefinitionBuilder<T>().Geo2D(indexedColumn);
-					break;
+					case IndexType.Text:
+						index = new IndexKeysDefinitionBuilder<T>().Text(indexedColumn);
+						break;
 
-				case IndexType.Geo2DSphere:
-					index = new IndexKeysDefinitionBuilder<T>().Geo2DSphere(indexedColumn);
-					break;
+					default:
+						return;
+				}
 
-				case IndexType.Hashed:
-					index = new IndexKeysDefinitionBuilder<T>().Hashed(indexedColumn);
-					break;
-
-				case IndexType.Text:
-					index = new IndexKeysDefinitionBuilder<T>().Text(indexedColumn);
-					break;
-
-				default:
+				if (index == null)
+				{
 					return;
+				}
+
+				var indexModel = new CreateIndexModel<T>(index, new CreateIndexOptions() { Background = indexDescriptor.Background, Sparse = indexDescriptor.Sparse, Unique = indexDescriptor.Unique });
+
+				collection.Indexes.CreateOne(indexModel);
 			}
-
-			if (index == null)
-			{
-				return;
-			}
-
-			var indexModel = new CreateIndexModel<T>(index, new CreateIndexOptions() { Background = indexDescriptor.Background, Sparse = indexDescriptor.Sparse, Unique = indexDescriptor.Unique });
-
-			collection.Indexes.CreateOne(indexModel);
 		}
 
 		#endregion
