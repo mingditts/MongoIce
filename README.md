@@ -18,7 +18,7 @@ public class Comment
   [BsonRepresentation(BsonType.ObjectId)]
   public string Id { get; set; }
 
-  [IndexDescriptor("Timestamp", IndexType.Ascending, true, false, false)]
+  [IndexDescriptor(IndexType.Ascending, true, false, false)]
   public long Timestamp { get; set; }
 
   public string AuthorName { get; set; }
